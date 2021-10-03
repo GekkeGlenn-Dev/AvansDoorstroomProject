@@ -1,0 +1,7 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.green-hover-state {
+    @apply hover:border-green-500 hover:text-green-500 transition duration-150 ease-in-out;
+}
