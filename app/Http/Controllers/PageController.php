@@ -7,6 +7,7 @@ use App\Models\ProductCategory;
 use App\Services\ShopService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Inertia\Response;
 
 class PageController extends Controller
@@ -36,8 +37,14 @@ class PageController extends Controller
         ]);
     }
 
-    public function addShopFiltersToSession()
+    /**
+     * TODO Add filters to session, misschien dit ook doen voor sort?
+     *
+     * @param Request $request
+     */
+    public function addShopFiltersToSession(Request $request)
     {
-        
+//        $request->session()->put('filters', ['filter', 'filter2']);
+        dd($request->session()->all());
     }
 }
