@@ -20,8 +20,8 @@ class CreateProductsTable extends Migration
             $table->text('description')->nullable();
             $table->bigInteger('price');
             $table->integer('stock')->default(0);
-            $table->integer('vat_percentage');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

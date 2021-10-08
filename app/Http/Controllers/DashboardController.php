@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\DashboardService;
 use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
 use Inertia\Response;
 
 class DashboardController extends Controller
@@ -18,16 +19,27 @@ class DashboardController extends Controller
         $this->dashboardService = $dashboardService;
     }
 
-    public function dashboard(): Response
+    public function dashboard(Request $request): Response
     {
+        if (!$request->user()->isAdmin()) {
+            $orders = Order::with('products', 'orderStatus')
+                ->where('user_id', '=', $request->user()->id)
+                ->whereBetween('created_at', [now()->subDays(10), now()])
+                ->paginate(10);
+            return $this->renderVue('Dashboard/DashboardCustomer', [
+                'orders' => $orders,
+            ]);
+        }
+
+
         $whereDate = now()->subDays(30);
-        $orders = Order::with('products')->whereDate('created_at', '>', $whereDate)->get();
+        $orders = Order::with('products')->where('order_status_id', '=', 2)->whereDate('created_at', '>', $whereDate)->get();
         $period = CarbonPeriod::create($whereDate->format('d-m-Y'), now()->format('d-m-Y'))->toArray();
 
         $revenueAndSalesTotals = $this->dashboardService->generateRevenueAndSalesOverviewTotals($orders);
 
         return $this->renderVue('Dashboard/Dashboard', [
-            'orderSeries' => $this->dashboardService->getChartSeries($period, $orders),
+            'series' => $this->dashboardService->getChartSeries($period, $orders),
             'topProducts' => Product::withCount('orders')->orderByDesc('orders_count')->take(5)->get(),
             'total' => [
                 'users' => User::whereDate('created_at', '>', $whereDate)->count(),

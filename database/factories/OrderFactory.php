@@ -25,8 +25,8 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->create(),
-            'order_status_id' => OrderStatus::factory()->create(),
+            'user_id' => User::all()->random(1)->first()->id,
+            'order_status_id' => OrderStatus::all()->random(1)->first()->id,
             'number' => $this->faker->unique()->bothify('##??##??##??##??##?#'),
             'street' => $this->faker->streetName,
             'house_number' => $this->faker->numberBetween(1,145),

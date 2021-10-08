@@ -25,7 +25,7 @@
 
                     <!-- Filters -->
                     <form class="mt-4 border-t border-gray-200">
-                        <Disclosure as="div" v-for="section in filters" :key="section.id"
+                        <Disclosure as="div" v-for="section in $page.props.query.filters" :key="section.id"
                                     class="border-t border-gray-200 px-4 py-6" v-slot="{ open }">
                             <h3 class="-mx-2 -my-3 flow-root">
                                 <DisclosureButton
@@ -43,9 +43,12 @@
                                 <div class="space-y-6">
                                     <div v-for="(option, optionIdx) in section.options" :key="option.value"
                                          class="flex items-center">
-                                        <input :id="`filter-mobile-${section.id}-${optionIdx}`"
-                                               :name="`${section.id}[]`" :value="option.value" type="checkbox"
-                                               :checked="option.checked"
+                                        <input @change="onUpdate"
+                                               :id="`filter-mobile-${section.id}-${optionIdx}`"
+                                               :name="`${section.id}[]`"
+                                               :value="option.value"
+                                               type="checkbox"
+                                               v-model="option.checked"
                                                class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"/>
                                         <label :for="`filter-mobile-${section.id}-${optionIdx}`"
                                                class="ml-3 min-w-0 flex-1 text-gray-500">
@@ -94,14 +97,13 @@ export default {
             type: Boolean,
             default: false
         },
-        filters: {
-            type: Object,
-            required: true,
-        }
     },
     methods: {
         close() {
             this.$emit('close', false);
+        },
+        onUpdate() {
+            this.$emit('onUpdate')
         }
     }
 }

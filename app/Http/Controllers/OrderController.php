@@ -3,69 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(): \Inertia\Response
     {
-        //
+        return $this->renderVue('Dashboard/Orders/Index', [
+            'orders' => Order::with('orderStatus', 'user')
+                ->withCount('products')
+                ->orderBy('created_at', 'desc')
+                ->paginate(25),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
     public function show(Order $order)
     {
-        //
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Order $order)
+    public function edit(Order $order): \Inertia\Response
     {
-        //
+        $order->loadMissing('orderStatus', 'user', 'products');
+
+        $order->addAddressToCollection();
+        $order->created_at_formated = sprintf('%s om %s',
+            $order->created_at->format('d M Y'),
+            $order->created_at->format('H:i')
+        );
+//        dd($order);
+
+        return $this->renderVue('Dashboard/Orders/Edit', [
+            'order' => $order,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param Order $order
+     * @return Response
      */
     public function update(Request $request, Order $order)
     {
@@ -75,8 +66,8 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
+     * @param Order $order
+     * @return Response
      */
     public function destroy(Order $order)
     {

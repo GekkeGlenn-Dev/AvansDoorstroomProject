@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\ShopService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 use Inertia\Response;
 
 class PageController extends Controller
@@ -21,20 +23,20 @@ class PageController extends Controller
 
     public function shop(Request $request): Response
     {
-        $sort = $this->shopService->getProductSortQuery($request->get('sort'));
-        $products = Product::with('categories', 'images')->orderBy($sort['column'], $sort['direction'])->get();
+        if ($request->has('query')) {
+            Inertia::share('query', $request->get('query'));
+        } else {
+            Inertia::share('query', $this->shopService->getQuery());
+        }
 
-//        Cache::forget('product.category.all');
-        $categories = Cache::remember('product.category.all', 60 * 60 * 24, function () {
-            return ProductCategory::all();
-        });
-
-        return $this->renderVue('Shop', [
-            'sortOptions' => $this->shopService->getProductSortingArray($request->get('sort')),
-            'products' => $products->toArray(),
-            'categories' => $categories->toArray(),
-            'filters' => $this->shopService->getShopFilters($categories->toArray()),
+        $sort = $request->has('sort') ? $request->get('sort')['id'] : null;
+        $currentSort = $this->shopService->getCurrentProductSortingFromSortId($sort);
+        Inertia::share('shop', [
+            'sortOptions' => $this->shopService->getProductSortingArray($currentSort['id']),
         ]);
+//        dd(Inertia::getShared('query'));
+
+        return $this->renderVue('Shop');
     }
 
     /**

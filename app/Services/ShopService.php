@@ -4,9 +4,15 @@
 namespace App\Services;
 
 
+use App\Models\Product;
+use App\Models\ProductCategory;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+
 class ShopService
 {
-    private const FILTER_CATEGORY = 'category';
+    public const FILTER_CATEGORY = 'category';
 
     private const SORT_OPTION_NEWEST_FIRST = [
         'id' => 1,
@@ -36,6 +42,48 @@ class ShopService
         self::SORT_OPTION_PRICE_HIGH_TO_LOW,
     ];
 
+    /** This works */
+    public function getCurrentProductSortingFromSortId(int $sortId = null): array
+    {
+        if ($sortId !== null) {
+            $current = null;
+            foreach (self::SORT_OPTIONS as $sort) {
+                if ($sort['id'] === $sortId) {
+                    $sort['current'] = true;
+                    $current = $sort;
+                } else {
+                    $sort['current'] = false;
+                }
+            }
+            return $current;
+        }
+
+        $item = self::SORT_OPTION_NEWEST_FIRST;
+        $item['current'] = true;
+        return $item;
+    }
+
+    public function getCurrentProductSortingFromSorts(array $sorts = null): array
+    {
+        if ($sorts !== null) {
+            $current = null;
+            foreach ($sorts as $sort) {
+                if ($sort['current']) {
+                    $sort['current'] = true;
+                    $current = $sort;
+                } else {
+                    $sort['current'] = false;
+                }
+            }
+            return $current;
+        }
+
+        $item = self::SORT_OPTION_NEWEST_FIRST;
+        $item['current'] = true;
+        return $item;
+    }
+
+    /** This works */
     public function getProductSortingArray(int $sort = null): array
     {
         if ($sort === null) {
@@ -64,6 +112,7 @@ class ShopService
         return $sortOptions;
     }
 
+    /** This works */
     public function getProductSortQuery(int $sort = null): array
     {
         if ($sort === null) {
@@ -123,5 +172,69 @@ class ShopService
         array_push($filters, $categoryFilter);
 
         return $filters;
+    }
+
+    public function getQuery(): array
+    {
+        $categories = Cache::remember('product.category.all', 60 * 60 * 24, function () {
+            return ProductCategory::all();
+        });
+
+        return [
+            'sorts' =>  $this->getProductSortingArray(),
+            'filters' => $this->getShopFilters($categories->toArray()),
+        ];
+    }
+
+    public function executeProductQuery(array $query, bool $toJson = false)
+    {
+        $sorts = $query['sorts'];
+        $currentSort = $this->getCurrentProductSortingFromSorts($sorts);
+        return json_encode($query);
+
+        $filters = $query['filters'];
+        $filterIsSelected = false;
+        $filterIds = [];
+
+        foreach ($filters as $section) {
+            foreach ($section['options'] as $option) {
+                if ($option['checked']) {
+                    array_push($filterIds, $option['value']);
+                    $filterIsSelected = true;
+                }
+            }
+        }
+
+        if ($filterIsSelected) {
+            $products = $this->getProductsBySortAndFilters($currentSort, $filterIds);
+        } else {
+            $products = $this->getProductsBySort($currentSort);
+        }
+
+        if ($toJson) {
+            return $products->toJson();
+        }
+        return $products;
+    }
+
+    private function getProductsBySort(array $sort): LengthAwarePaginator
+    {
+        $sortQuery = $this->getProductSortQuery($sort['id']);
+
+        return Product::with('categories', 'images')
+            ->orderBy($sortQuery['column'], $sortQuery['direction'])
+            ->paginate(21);
+    }
+
+    private function getProductsBySortAndFilters(array $sort, array $ids): LengthAwarePaginator
+    {
+        $sortQuery = $this->getProductSortQuery($sort['id']);
+
+        return Product::with('categories', 'images')
+            ->whereHas('categories', function (Builder $query) use ($ids) {
+                $query->whereIn('product_categories.id', $ids);
+            })
+            ->orderBy($sortQuery['column'], $sortQuery['direction'])
+            ->paginate(21);
     }
 }

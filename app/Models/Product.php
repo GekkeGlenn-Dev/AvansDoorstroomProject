@@ -13,7 +13,7 @@ class Product extends Model
 
     public function categories(): BelongsToMany
     {
-        return $this->BelongsToMany(ProductCategory::class);
+        return $this->BelongsToMany(ProductCategory::class, 'product_product_category', 'product_id', 'product_category_id');
     }
 
     public function orders(): BelongsToMany

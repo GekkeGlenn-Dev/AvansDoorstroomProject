@@ -25,9 +25,16 @@ module.exports = {
                     700: '#313135',
                     800: '#222225',
                     900: '#111111',
+                    green: '#10CB8A'
                 }
             }
         },
+    },
+    variants: {
+        extend: {
+            textColor: ['odd'],
+            backgroundColor: ['odd']
+        }
     },
 
     plugins: [

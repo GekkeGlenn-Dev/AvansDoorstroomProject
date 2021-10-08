@@ -2,11 +2,11 @@
     <div class="bg-white">
         <div>
             <!-- Mobile filter dialog -->
-            <shop-filters-phone :filters="filters" :open="mobileFiltersOpen" @close="togglePhoneMenu"/>
+            <shop-filters-phone :open="mobileFiltersOpen" @close="togglePhoneMenu" @onUpdate="updateQuery"/>
 
             <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="relative z-10 flex items-baseline justify-between pt-24 pb-6 border-b border-gray-200">
-                    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">Shop</h1>
+                    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">Bestel Snel</h1>
 
                     <div class="flex items-center">
                         <Menu as="div" class="relative inline-block text-left">
@@ -20,14 +20,17 @@
                             <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
                                 <MenuItems class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div class="py-1">
-                                        <MenuItem v-for="option in sortOptions" :key="option.name" v-slot="{ active }">
-                                            <inertia-link :href="route('shop', {sort: option.id})" :class="[option.current ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']">
+                                        <MenuItem v-for="option in $page.props.shop.sortOptions" :key="option.name" v-slot="{ active }">
+                                            <inertia-link :href="route('shop', {sort: option, query: $page.props.query})" :class="[option.current ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']">
                                                 {{ option.label }}
                                             </inertia-link>
                                         </MenuItem>
                                     </div>
                                 </MenuItems>
                             </transition>
+<!--                            <MenuItem>-->
+<!--                                TEST-->
+<!--                            </MenuItem>-->
                         </Menu>
 
                         <button type="button" class="p-2 -m-2 ml-4 sm:ml-6 text-gray-400 hover:text-gray-500 lg:hidden" @click="togglePhoneMenu(true)">
@@ -43,7 +46,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-10">
                         <!-- Filters -->
                         <form class="hidden lg:block">
-                            <shop-filters :filters="filters"/>
+                            <shop-filters @onUpdate="updateQuery"/>
                         </form>
 
                         <!-- Product grid -->
@@ -99,14 +102,6 @@ export default {
         ViewGridIcon,
         XIcon,
     },
-    props: {
-        sortOptions: Array,
-        categories: Object,
-        filters: {
-            type: Object,
-            required: true,
-        }
-    },
     data() {
         return {
             mobileFiltersOpen: false,
@@ -115,6 +110,9 @@ export default {
     methods: {
         togglePhoneMenu(state) {
             this.mobileFiltersOpen = state;
+        },
+        updateQuery() {
+            this.$emit('onQueryUpdate');
         }
     }
 }

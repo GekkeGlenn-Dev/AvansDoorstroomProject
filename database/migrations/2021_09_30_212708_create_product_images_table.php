@@ -19,6 +19,7 @@ class CreateProductImagesTable extends Migration
             $table->foreignIdFor(Product::class)->constrained();
             $table->string('url');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

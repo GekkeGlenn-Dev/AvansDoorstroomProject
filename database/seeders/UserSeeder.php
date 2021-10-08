@@ -16,8 +16,13 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-         User::factory(rand(500, 5000))
-             ->has(Order::factory())
-             ->create();
+        User::factory()->create([
+            'email' => 'admin@admin.nl',
+            'is_admin' => true
+        ]);
+
+        User::factory(rand(100, 1500))
+            ->has(Order::factory(rand(1, 3)), 'orders')
+            ->create();
     }
 }

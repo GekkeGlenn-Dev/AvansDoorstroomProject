@@ -44,7 +44,7 @@ export default {
     name: "Dashboard",
     components: {Card, DashboardLayout},
     props: {
-        orderSeries: Object,
+        series: Object,
         total: Object,
         topProducts: Array,
     },
@@ -52,8 +52,19 @@ export default {
         return {
             currency: new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}),
             options: {
+                // #10CB8A
+
+                colors: ['#10CB8A', '#797BF2', '#1E8BC7'],
                 chart: {
-                    background: 'rgba(0,0,0,0)'
+                    background: 'rgba(0,0,0,0)',
+                    toolbar: {
+                        tools: {
+                            download: false,
+                            zoom: true,
+                            pan: false,
+
+                        },
+                    },
                 },
                 theme: {
                     mode: 'dark',
@@ -69,15 +80,18 @@ export default {
                     enabled: false
                 },
                 tooltip: {
-                    theme: "dark"
+                    theme: "dark",
                 },
                 xaxis: {
-                    type: "string"
+                    type: "string",
+                    labels: {
+                        show: false,
+                    },
+                    tooltip: {
+                        enabled: false,
+                    },
                 },
             },
-            series: [
-                this.orderSeries
-            ],
         }
     },
 }

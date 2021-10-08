@@ -22,6 +22,7 @@
                     </table-data>
                 </table-column>
             </Table>
+            <pagination :links="products.links" class="mt-2"/>
         </card>
     </dashboard-layout>
 </template>
@@ -32,10 +33,11 @@ import Card from "../../../Components/Card";
 import Table from "../../../Components/Table";
 import TableColumn from "../../../Components/TableColumn";
 import TableData from "../../../Components/TableData";
+import Pagination from "../../../Components/Pagination";
 
 export default {
     name: "Index",
-    components: {TableData, TableColumn, Table, Card, DashboardLayout},
+    components: {Pagination, TableData, TableColumn, Table, Card, DashboardLayout},
     props: {
         products: Object,
     },
