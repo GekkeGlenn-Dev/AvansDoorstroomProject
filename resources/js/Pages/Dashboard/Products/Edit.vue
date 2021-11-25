@@ -1,29 +1,42 @@
 <template>
     <dashboard-layout :title="product.title">
+        <template #extra>
+            <div class="flex space-x-2">
+                <button class="form-submit-button" @click.prevent="submit">
+                    Opslaan
+                </button>
+                <button
+                    class="px-2 py-1 bg-transparent block text-red-500 rounded transition-colors duration-150 ease-in-out border border-red-500 hover:text-red-400 hover:border-red-400"
+                    @click.prevent="submitRemove"
+                >
+                    Verwijderen
+                </button>
+            </div>
+        </template>
         <data-list title="Product" :subtitle="`Op ${product.orders_count} bestellingen.`">
             <data-list-item>
                 <template #term>
-                    Naam
+                    <label for="title" class="form-label">Titel</label>
                 </template>
-                {{ product.title }}
+                <input type="text" id="title" v-model="form.title" class="form-input">
             </data-list-item>
             <data-list-item>
                 <template #term>
-                    Beschrijving
+                    <label for="description" class="form-label">Beschrijving</label>
                 </template>
-                {{ product.description }}
+                <textarea id="description" cols="30" rows="5" v-model="form.description" class="form-input"/>
             </data-list-item>
             <data-list-item>
                 <template #term>
-                    Prijs
+                    <label for="price" class="form-label">Prijs</label>
                 </template>
-                {{ currency.format(product.price / 100) }}
+                <input type="number" id="price" v-model="form.price" class="form-input">
             </data-list-item>
             <data-list-item>
                 <template #term>
-                    Voorraad
+                    <label for="stock" class="form-label">Voorraad</label>
                 </template>
-                {{ product.stock }}
+                <input type="number" id="stock" v-model="form.stock" class="form-input">
             </data-list-item>
             <data-list-item>
                 <template #term>
@@ -53,21 +66,32 @@
 import DashboardLayout from "../../../Layouts/DashboardLayout";
 import DataList from "../../../Components/DataList";
 import DataListItem from "../../../Components/DataListItem";
+import Button from "../../../Jetstream/Button";
 
 export default {
     name: "Edit",
-    components: {DataListItem, DataList, DashboardLayout},
+    components: {Button, DataListItem, DataList, DashboardLayout},
     props: {
         product: Object
     },
     data() {
         return {
             currency: new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}),
+            form: this.$inertia.form({
+                title: this.product.title,
+                description: this.product.description,
+                price: this.product.price,
+                stock: this.product.stock
+            }),
+        }
+    },
+    methods: {
+        submit() {
+            this.form.put(this.route('dashboard.product.update', {product: this.product}));
+        },
+        submitRemove() {
+            this.form.delete(this.route('dashboard.product.destroy', {product: this.product}));
         }
     }
 }
 </script>
-
-<style scoped>
-
-</style>

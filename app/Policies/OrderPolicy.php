@@ -5,90 +5,58 @@ namespace App\Policies;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class OrderPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny(User $user)
+    public function viewAny(User $user): Response
     {
-        //
+        return $user->isAdmin()
+            ? $this->allow()
+            : $this->deny();
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view(User $user, Order $order)
+    public function view(User $user, Order $order): Response
     {
-        //
+        if ($user->isAdmin()) {
+            return $this->allow();
+        }
+
+        return $user->id === $order->user_id
+            ? $this->allow()
+            : $this->deny();
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create(User $user)
+    public function create(User $user): Response
     {
-        //
+        return $this->allow();
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update(User $user, Order $order)
+    public function update(User $user, Order $order): Response
     {
-        //
+        return $user->isAdmin()
+            ? $this->allow()
+            : $this->deny();
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete(User $user, Order $order)
+    public function delete(User $user, Order $order): Response
     {
-        //
+        return $user->isAdmin()
+            ? $this->allow()
+            : $this->deny();
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore(User $user, Order $order)
+    public function restore(User $user, Order $order): Response
     {
-        //
+        return $user->isAdmin()
+            ? $this->allow()
+            : $this->deny();
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete(User $user, Order $order)
+    public function forceDelete(User $user, Order $order): Response
     {
-        //
+        return $this->deny();
     }
 }

@@ -5,8 +5,8 @@
             <div class="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
                 <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">Producten</h2>
 
-                <div v-if="products" class="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                    <div v-for="product in products.data" class="group relative">
+                <div class="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+                    <div v-for="product in products" class="group relative">
                         <div
                             class="w-full min-h-60 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none">
                             <!--                            <img :src="product.images[0]" :alt="product.imageAlt"-->
@@ -38,22 +38,25 @@ import ShoppingCartDialog from "../Components/ShoppingCartDialog";
 export default {
     name: "Shop",
     components: {ShoppingCartDialog, ShopLayout},
+    props: {
+        products: Array,
+    },
     created() {
         this.fetchProducts()
     },
     data() {
         return {
-            products: null,
+            // products: null,
             currency: new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}),
         }
     },
     methods: {
         fetchProducts() {
-            axios.get(route('api.shop.products.query', {query: this.$page.props.query}))
-                .then((res => {
-                    this.products = res.data;
-                    console.log(res.data);
-                }));
+            // axios.get(route('api.shop.products.query', {query: this.$page.props.query}))
+            //     .then((res => {
+            //         this.products = res.data;
+            //         console.log(res.data);
+            //     }));
         }
     }
 }

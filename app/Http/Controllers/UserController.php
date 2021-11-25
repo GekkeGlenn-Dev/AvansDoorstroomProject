@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index(): \Inertia\Response
     {
         // all users.
-        return $this->renderVue('Dashboard/Users/Index', [
+        return $this->inertia->render('Dashboard/Users/Index', [
             'users' => User::withCount('orders')
                 ->orderBy('created_at')
                 ->paginate(25),
@@ -42,7 +42,7 @@ class UserController extends Controller
     {
         $user->loadMissing('orders');
 
-        return $this->renderVue('Dashboard/Users/Edit', [
+        return $this->inertia->render('Dashboard/Users/Edit', [
             'user' => $user
         ]);
     }

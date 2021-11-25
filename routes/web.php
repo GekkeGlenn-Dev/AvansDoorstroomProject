@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BasketController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,17 +15,17 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 auth()->loginUsingId(1);
-Route::get('shop', [PageController::class, 'shop'])->name('shop');
-Route::get('shop/product/{product:slug}', [ProductController::class, 'show'])->name('shop.product.show');
-//Route::get('/', function () {
-//    return Inertia::render('Dashboard/Dashboard'/*, [
-//        'canLogin' => Route::has('login'),
-//        'canRegister' => Route::has('register'),
-//        'laravelVersion' => Application::VERSION,
-//        'phpVersion' => PHP_VERSION,
-//    ]*/);
-//});
+Route::get('/', [PageController::class, 'shop'])->name('shop');
+Route::get('product/{product:slug}', [ProductController::class, 'show'])->name('shop.product.show');
+
+Route::get('winkelmandje/product/toevoegen/{product:slug}', [BasketController::class, 'addProduct']);
+Route::get('winkelmandje/product/verwijder/{product:slug}', [BasketController::class, 'removeProduct']);
+
+Route::get('winkelmandje/uitchecken', [BasketController::class, 'checkoutDetails'])->name('basket.checkout');
+Route::post('winkelmandje/uitchecken', [BasketController::class, 'processCheckout'])->name('basket.checkout.process');
+Route::get('winkelmandje/betaald', [BasketController::class, 'checkoutOrderDetails'])->name('basket.checkout.finish');
 
 include_once('dashboard.php');
 

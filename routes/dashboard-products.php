@@ -1,9 +1,7 @@
 <?php
 
-
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::prefix('producten')->name('product.')->group(function () {
     Route::get('/', [
@@ -28,8 +26,14 @@ Route::prefix('product/{product:slug}')->name('product.')->group(function () {
         'edit'
     ])->name('edit');
 
+    Route::delete('verwijder', [
+        ProductController::class,
+        'destroy'
+    ])->name('destroy');
+
     Route::put('opslaan', [
         ProductController::class,
         'update'
     ])->name('update');
 });
+

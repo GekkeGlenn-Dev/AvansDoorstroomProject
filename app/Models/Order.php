@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string postal_code
  * @property string city
  * @property string country
+ * @property int number
+ * @property int order_status_id
  */
 class Order extends Model
 {

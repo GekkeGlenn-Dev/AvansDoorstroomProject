@@ -15,13 +15,12 @@ class OrderSeeder extends Seeder
      */
     public function run()
     {
-//        $orders = Order::factory(rand(500, 1000))->create();
         $orders = Order::all();
 
         foreach ($orders as $order) {
             $productIds = Product::all()->random(rand(2, 5))->pluck('id')->toArray();
 
-            $order->products()->attach($productIds, ['quantity' => rand(1, 6)]);
+            $order->products()->attach($productIds, ['quantity' => rand(1, 3)]);
         }
     }
 }

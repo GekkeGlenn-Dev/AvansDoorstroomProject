@@ -21,8 +21,8 @@ class UserSeeder extends Seeder
             'is_admin' => true
         ]);
 
-        User::factory(rand(100, 1500))
-            ->has(Order::factory(rand(1, 3)), 'orders')
+        User::factory(rand(100, 300))
+            ->has(Order::factory(), 'orders')
             ->create();
     }
 }

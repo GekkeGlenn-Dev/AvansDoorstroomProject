@@ -5,20 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\DashboardService;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    private DashboardService $dashboardService;
-
-    public function __construct(DashboardService $dashboardService)
-    {
-        $this->dashboardService = $dashboardService;
-    }
-
     public function dashboard(Request $request): Response
     {
         if (!$request->user()->isAdmin()) {
@@ -26,7 +18,7 @@ class DashboardController extends Controller
                 ->where('user_id', '=', $request->user()->id)
                 ->whereBetween('created_at', [now()->subDays(10), now()])
                 ->paginate(10);
-            return $this->renderVue('Dashboard/DashboardCustomer', [
+            return $this->inertia->render('Dashboard/DashboardCustomer', [
                 'orders' => $orders,
             ]);
         }
@@ -38,7 +30,7 @@ class DashboardController extends Controller
 
         $revenueAndSalesTotals = $this->dashboardService->generateRevenueAndSalesOverviewTotals($orders);
 
-        return $this->renderVue('Dashboard/Dashboard', [
+        return $this->inertia->render('Dashboard/Dashboard', [
             'series' => $this->dashboardService->getChartSeries($period, $orders),
             'topProducts' => Product::withCount('orders')->orderByDesc('orders_count')->take(5)->get(),
             'total' => [

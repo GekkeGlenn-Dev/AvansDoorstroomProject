@@ -34,6 +34,10 @@ class ProductStoreRequest extends FormRequest
                 'nullable',
                 'numeric'
             ],
+            'categories' => [
+                'nullable',
+                'array'
+            ],
         ];
     }
 }

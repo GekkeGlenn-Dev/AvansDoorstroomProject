@@ -5,3 +5,19 @@
 .green-hover-state {
     @apply hover:border-dark-green hover:text-dark-green transition duration-150 ease-in-out;
 }
+
+.form-group {
+    @apply flex flex-col py-4 px-6;
+}
+
+.form-label {
+    @apply text-dark-100;
+}
+
+.form-input {
+    @apply rounded bg-transparent text-dark-100 w-2/3;
+}
+
+.form-submit-button {
+    @apply px-2 py-1 green-hover-state bg-transparent block text-dark-100 rounded transition-colors duration-150 ease-in-out border border-dark-800 hover:text-dark-green hover:border-dark-green;
+}

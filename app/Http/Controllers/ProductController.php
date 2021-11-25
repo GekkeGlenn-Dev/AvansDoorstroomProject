@@ -3,36 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Product;
-use App\Services\ShopService;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\ProductCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 use Inertia\Response;
 
 class ProductController extends Controller
 {
-    private ShopService $shopService;
-
-    public function __construct(ShopService $shopService)
-    {
-        $this->shopService = $shopService;
-    }
-
     public function index(): Response
     {
-        return Inertia::render('Dashboard/Products/Index', [
+        return $this->inertia->render('Dashboard/Products/Index', [
             'products' => Product::withCount('orders')->paginate(25),
         ]);
     }
 
     public function create(): Response
     {
-       return $this->renderVue('Dashboard/Products/Create');
+       return $this->inertia->render('Dashboard/Products/Create', [
+           'categories' => ProductCategory::all()->toArray(),
+       ]);
     }
 
     public function store(ProductStoreRequest $request): RedirectResponse
@@ -47,33 +39,46 @@ class ProductController extends Controller
         $product->stock = $validated['stock'];
         $product->save();
 
-        return \response()->redirectToRoute('dashboard.product.edit', ['product' => $product]);
-        //todo add images and categories.
+        $product->categories()->sync($validated['categories']);
+
+        return \response()->redirectToRoute('dashboard.product.edit', compact('product'));
     }
 
     public function show(Product $product): Response
     {
         $product->loadMissing('categories', 'images');
-        return $this->renderVue('Products/Show', compact('product'));
+        return $this->inertia->render('Products/Show', compact('product'));
     }
 
     public function edit(Product $product): Response
     {
         $product->loadMissing('categories', 'images')->loadCount('orders');
 
-        return $this->renderVue('Dashboard/Products/Edit', compact('product'));
+        return $this->inertia->render('Dashboard/Products/Edit', compact('product'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductUpdateRequest $request, Product $product): RedirectResponse
     {
-        //
+        //todo Make updateRequest, validate, add validated to product, save and redirect to detail page.
+        $validated = $request->validated();
+
+        $product->title = $validated['title'];
+        $product->slug = Str::slug(trim($validated['title']));
+        $product->description = $validated['description'];
+        $product->price = $validated['price'] * 100;
+        $product->stock = $validated['stock'];
+        $product->save();
+
+        return \response()->redirectToRoute('dashboard.product.edit', compact('product'))->with('success', 'Product opgeslagen');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product): RedirectResponse
     {
-        //
+        $product->delete();
+        return \response()->redirectToRoute('dashboard.product.index')->with('success', 'Product verwijderd!');
     }
 
+    // TODO change
     public function ApiQuery(Request $request): string
     {
         if (!$request->has('query')) {

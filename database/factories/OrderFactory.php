@@ -27,7 +27,7 @@ class OrderFactory extends Factory
         return [
             'user_id' => User::all()->random(1)->first()->id,
             'order_status_id' => OrderStatus::all()->random(1)->first()->id,
-            'number' => $this->faker->unique()->bothify('##??##??##??##??##?#'),
+            'number' => $this->faker->unique()->numerify('####################'),
             'street' => $this->faker->streetName,
             'house_number' => $this->faker->numberBetween(1,145),
             'house_number_addition' => $this->faker->randomLetter,

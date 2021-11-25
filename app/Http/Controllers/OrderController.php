@@ -12,7 +12,7 @@ class OrderController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return $this->renderVue('Dashboard/Orders/Index', [
+        return $this->inertia->render('Dashboard/Orders/Index', [
             'orders' => Order::with('orderStatus', 'user')
                 ->withCount('products')
                 ->orderBy('created_at', 'desc')
@@ -44,9 +44,8 @@ class OrderController extends Controller
             $order->created_at->format('d M Y'),
             $order->created_at->format('H:i')
         );
-//        dd($order);
 
-        return $this->renderVue('Dashboard/Orders/Edit', [
+        return $this->inertia->render('Dashboard/Orders/Edit', [
             'order' => $order,
         ]);
     }

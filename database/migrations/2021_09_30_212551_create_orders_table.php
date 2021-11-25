@@ -13,11 +13,11 @@ class CreateOrdersTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained();
+            $table->foreignIdFor(User::class)->nullable()->constrained();
             $table->foreignIdFor(OrderStatus::class)->constrained();
             $table->string('number')->unique();
             $table->string('street');

@@ -1,5 +1,10 @@
 <template>
     <dashboard-layout title="Producten">
+        <template #extra>
+            <inertia-link class="form-submit-button" :href="route('dashboard.product.create')">
+                Product toevoegen
+            </inertia-link>
+        </template>
         <card class="col-span-12">
             <Table :columns="columns">
                 <table-column v-for="product in products.data">
@@ -15,9 +20,13 @@
                     <table-data>
                         {{product.orders_count}}
                     </table-data>
-                    <table-data :edit="true">
-                        <inertia-link :href="route('dashboard.product.edit', {product: product})">
+                    <table-data :edit="true" class="space-x-2">
+                        <inertia-link class="font-medium text-dark-100 hover:text-dark-green" :href="route('dashboard.product.edit', {product: product})">
                             Bewerken
+                        </inertia-link>
+
+                        <inertia-link class="font-medium text-red-500 hover:text-red-400" :href="route('dashboard.product.destroy', {product: product})">
+                            verwijder
                         </inertia-link>
                     </table-data>
                 </table-column>

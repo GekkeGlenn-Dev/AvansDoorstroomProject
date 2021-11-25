@@ -14,13 +14,6 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    private ShopService $shopService;
-
-    public function __construct(ShopService $shopService)
-    {
-        $this->shopService = $shopService;
-    }
-
     public function shop(Request $request): Response
     {
         if ($request->has('query')) {
@@ -36,7 +29,12 @@ class PageController extends Controller
         ]);
 //        dd(Inertia::getShared('query'));
 
-        return $this->renderVue('Shop');
+
+        $products = Product::all();
+
+        return $this->inertia->render('Shop', [
+            'products' => $products->toArray(),
+        ]);
     }
 
     /**
