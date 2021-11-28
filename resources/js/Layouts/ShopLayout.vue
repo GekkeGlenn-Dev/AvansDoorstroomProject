@@ -1,8 +1,9 @@
 <template>
     <div class="bg-white">
         <div>
+            <shopping-cart-dialog :open="basketOpen"/>
             <!-- Mobile filter dialog -->
-            <shop-filters-phone :open="mobileFiltersOpen" @close="togglePhoneMenu" @onUpdate="updateQuery"/>
+            <shop-filters-phone :filters="filters" @close="togglePhoneMenu" @onUpdate="updateQuery"/>
 
             <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="relative z-10 flex items-baseline justify-between pt-24 pb-6 border-b border-gray-200">
@@ -20,10 +21,14 @@
                             <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
                                 <MenuItems class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div class="py-1">
-                                        <MenuItem v-for="option in $page.props.shop.sortOptions" :key="option.name" v-slot="{ active }">
-                                            <inertia-link :href="route('shop', {sort: option, query: $page.props.query})" :class="[option.current ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']">
+                                        <MenuItem v-for="option in sortOptions" :key="option.name">
+                                            <div
+                                                @click.prevent="sortOptionClicked(option)"
+                                                :class="[option.active ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']"
+                                                class="cursor-pointer"
+                                            >
                                                 {{ option.label }}
-                                            </inertia-link>
+                                            </div>
                                         </MenuItem>
                                     </div>
                                 </MenuItems>
@@ -35,6 +40,11 @@
 
                         <button type="button" class="p-2 -m-2 ml-4 sm:ml-6 text-gray-400 hover:text-gray-500 lg:hidden" @click="togglePhoneMenu(true)">
                             <span class="sr-only">Filters</span>
+                            <FilterIcon class="w-5 h-5" aria-hidden="true" />
+                        </button>
+
+                        <button type="button" class="p-2 -m-2 ml-4 sm:ml-6 text-gray-400 hover:text-gray-500" @click="toggleBasket(true)">
+                            <span class="sr-only">Winkelmand</span>
                             <FilterIcon class="w-5 h-5" aria-hidden="true" />
                         </button>
                     </div>
@@ -67,9 +77,6 @@
 import {
     Dialog,
     DialogOverlay,
-    Disclosure,
-    DisclosureButton,
-    DisclosurePanel,
     Menu,
     MenuButton,
     MenuItem, MenuItems, TransitionChild, TransitionRoot
@@ -78,17 +85,16 @@ import {ChevronDownIcon, FilterIcon, MinusSmIcon, PlusSmIcon, ViewGridIcon} from
 import {XIcon} from "@heroicons/vue/outline";
 import ShopFiltersPhone from "../Components/ShopFiltersPhone";
 import ShopFilters from "../Components/ShopFilters";
+import ShoppingCartDialog from "../Components/ShoppingCartDialog";
 
 export default {
     name: "ShopLayout",
     components: {
+        ShoppingCartDialog,
         ShopFilters,
         ShopFiltersPhone,
         Dialog,
         DialogOverlay,
-        Disclosure,
-        DisclosureButton,
-        DisclosurePanel,
         Menu,
         MenuButton,
         MenuItem,
@@ -102,22 +108,37 @@ export default {
         ViewGridIcon,
         XIcon,
     },
+    props: {
+        sortOptions: Array,
+        filters: Array,
+    },
     data() {
         return {
             mobileFiltersOpen: false,
+            basketOpen: false,
         }
     },
     methods: {
         togglePhoneMenu(state) {
             this.mobileFiltersOpen = state;
         },
+        toggleBasket(state) {
+            this.basketOpen = state;
+        },
         updateQuery() {
             this.$emit('onQueryUpdate');
+        },
+        sortOptionClicked(option) {
+            let newOptions = [];
+
+            this.sortOptions.forEach(opt => {
+                let theOption = opt;
+                theOption.active = theOption.id === option.id;
+                newOptions.push(opt);
+            });
+
+            this.$emit('filtersUpdated', newOptions);
         }
     }
 }
 </script>
-
-<style scoped>
-
-</style>

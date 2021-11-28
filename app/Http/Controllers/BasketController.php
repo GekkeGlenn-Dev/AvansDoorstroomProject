@@ -30,6 +30,14 @@ class BasketController extends Controller
         $this->basketService = $basketService;
     }
 
+    public function index(Request $request): Response
+    {
+        $basket = $this->basketService->getBasket($request);
+        return $this->inertia->render('Basket', [
+            'basket' => $basket
+        ]);
+    }
+
     public function addProduct(Request $request, Product $product): RedirectResponse
     {
         $this->basketService->addProduct($request, $product);
@@ -56,7 +64,6 @@ class BasketController extends Controller
     {
         $validated = $request->validated();
 
-
         $basket = $this->basketService->getBasket($request);
 
         $order = new Order();
@@ -66,12 +73,8 @@ class BasketController extends Controller
 
         $order->order_status_id = OrderStatus::ORDER_PAYED;
         $order->number = Carbon::now()->getTimestamp();
-        $order->street = $validated['street'];
-        $order->house_number = $validated['house_number'];
-        $order->house_number_addition = $validated['house_number_addition'];
-        $order->postal_code = $validated['postal_code'];
-        $order->city = $validated['city'];
-        $order->country = $validated['country'];
+        $order->fill($validated);
+        $order->save();
 
         foreach($basket->products as $product) {
             $order->products()->attach($product->id, ['quantity' => $product->pivot->quantity]);
@@ -87,8 +90,11 @@ class BasketController extends Controller
     }
 
     // todo the order details die net betaald is.
-    public function checkoutOrderDetails(): Response
+    public function checkoutOrderDetails(Order $order): Response
     {
-        $this->inertia->render('Checkout/CheckoutDetail');
+        $order->loadMissing('products');
+        return $this->inertia->render('Checkout/CheckoutDetail', [
+            'order' => $order
+        ]);
     }
 }

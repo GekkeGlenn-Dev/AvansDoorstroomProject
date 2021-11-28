@@ -17,22 +17,22 @@ class ShopService
     private const SORT_OPTION_NEWEST_FIRST = [
         'id' => 1,
         'label' => 'Nieuwste eerst',
-        'current' => false,
+        'active' => false,
     ];
     private const SORT_OPTION_LATEST_FIRST = [
         'id' => 2,
         'label' => 'Oudste eerst',
-        'current' => false,
+        'active' => false,
     ];
     private const SORT_OPTION_PRICE_LOW_TO_HIGH = [
         'id' => 3,
         'label' => 'Prijs: laag naar hoog',
-        'current' => false,
+        'active' => false,
     ];
     private const SORT_OPTION_PRICE_HIGH_TO_LOW = [
         'id' => 4,
         'label' => 'Prijs: hoog naar laag',
-        'current' => false,
+        'active' => false,
     ];
 
     private const SORT_OPTIONS = [
@@ -42,44 +42,124 @@ class ShopService
         self::SORT_OPTION_PRICE_HIGH_TO_LOW,
     ];
 
+    /**
+     * TODAY 27-11-2021
+     */
+    public function getProductSorting(int $sortId = self::SORT_OPTION_NEWEST_FIRST['id']): array
+    {
+        $sorts = [];
+        foreach (self::SORT_OPTIONS as $sort) {
+            if ($sort['id'] === $sortId) {
+                $sort['active'] = true;
+            }
+            $sorts[] = $sort;
+        }
+        return $sorts;
+    }
+
+    public function getProductOrderBy(array $sortOptions): array
+    {
+        $order = [
+            'key' => 'id',
+            'by' => 'desc'
+        ];
+
+        foreach ($sortOptions as $sort) {
+            if (!$sort['active']) {
+                continue;
+            }
+
+            switch ($sort['id']) {
+                case self::SORT_OPTION_LATEST_FIRST['id']:
+                    $order['key'] = 'id';
+                    $order['by'] = 'asc';
+                    break;
+
+                case self::SORT_OPTION_PRICE_LOW_TO_HIGH['id']:
+                    $order['key'] = 'price';
+                    $order['by'] = 'asc';
+                    break;
+
+                case self::SORT_OPTION_PRICE_HIGH_TO_LOW['id']:
+                    $order['key'] = 'price';
+                    $order['by'] = 'desc';
+                    break;
+
+                case self::SORT_OPTION_NEWEST_FIRST['id']:
+                default:
+                    break;
+            }
+        }
+
+        return $order;
+    }
+
+    public function getShopFilters(): array
+    {
+        $productCategories = Cache::remember('product.category.all', 60 * 60 * 24, function () {
+            return ProductCategory::all();
+        });
+
+        $filters = [];
+        $categoryFilter = [
+            'id' => self::FILTER_CATEGORY,
+            'name' => 'Categorieën',
+            'options' => []
+        ];
+
+        foreach ($productCategories as $category) {
+            array_push($categoryFilter['options'], [
+                'value' => $category['id'],
+                'label' => $category['name'],
+                'checked' => false
+            ]);
+        }
+
+        array_push($filters, $categoryFilter);
+
+        return $filters;
+    }
+
+    // OLD
+
     /** This works */
     public function getCurrentProductSortingFromSortId(int $sortId = null): array
     {
         if ($sortId !== null) {
-            $current = null;
+            $active = null;
             foreach (self::SORT_OPTIONS as $sort) {
                 if ($sort['id'] === $sortId) {
-                    $sort['current'] = true;
-                    $current = $sort;
+                    $sort['active'] = true;
+                    $active = $sort;
                 } else {
-                    $sort['current'] = false;
+                    $sort['active'] = false;
                 }
             }
-            return $current;
+            return $active;
         }
 
         $item = self::SORT_OPTION_NEWEST_FIRST;
-        $item['current'] = true;
+        $item['active'] = true;
         return $item;
     }
 
     public function getCurrentProductSortingFromSorts(array $sorts = null): array
     {
         if ($sorts !== null) {
-            $current = null;
+            $active = null;
             foreach ($sorts as $sort) {
-                if ($sort['current']) {
-                    $sort['current'] = true;
-                    $current = $sort;
+                if ($sort['active']) {
+                    $sort['active'] = true;
+                    $active = $sort;
                 } else {
-                    $sort['current'] = false;
+                    $sort['active'] = false;
                 }
             }
-            return $current;
+            return $active;
         }
 
         $item = self::SORT_OPTION_NEWEST_FIRST;
-        $item['current'] = true;
+        $item['active'] = true;
         return $item;
     }
 
@@ -93,20 +173,20 @@ class ShopService
         $sortOptions = self::SORT_OPTIONS;
         switch ($sort) {
             case self::SORT_OPTION_PRICE_LOW_TO_HIGH['id']:
-                $sortOptions[2]['current'] = true;
+                $sortOptions[2]['active'] = true;
                 break;
 
             case self::SORT_OPTION_PRICE_HIGH_TO_LOW['id']:
-                $sortOptions[3]['current'] = true;
+                $sortOptions[3]['active'] = true;
                 break;
 
             case self::SORT_OPTION_LATEST_FIRST['id']:
-                $sortOptions[1]['current'] = true;
+                $sortOptions[1]['active'] = true;
                 break;
 
             case self::SORT_OPTION_NEWEST_FIRST['id']:
             default:
-                $sortOptions[0]['current'] = true;
+                $sortOptions[0]['active'] = true;
                 break;
         }
         return $sortOptions;
@@ -152,28 +232,6 @@ class ShopService
         return $sort;
     }
 
-    public function getShopFilters(array $productCategories): array
-    {
-        $filters = [];
-        $categoryFilter = [
-            'id' => self::FILTER_CATEGORY,
-            'name' => 'Categorieën',
-            'options' => []
-        ];
-
-        foreach ($productCategories as $category) {
-            array_push($categoryFilter['options'], [
-                'value' => $category['id'],
-                'label' => $category['name'],
-                'checked' => false
-            ]);
-        }
-
-        array_push($filters, $categoryFilter);
-
-        return $filters;
-    }
-
     public function getQuery(): array
     {
         $categories = Cache::remember('product.category.all', 60 * 60 * 24, function () {
@@ -181,7 +239,7 @@ class ShopService
         });
 
         return [
-            'sorts' =>  $this->getProductSortingArray(),
+            'sorts' => $this->getProductSortingArray(),
             'filters' => $this->getShopFilters($categories->toArray()),
         ];
     }

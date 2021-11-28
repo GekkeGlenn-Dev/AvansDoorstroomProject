@@ -16,25 +16,13 @@ class PageController extends Controller
 {
     public function shop(Request $request): Response
     {
-        if ($request->has('query')) {
-            Inertia::share('query', $request->get('query'));
-        } else {
-            Inertia::share('query', $this->shopService->getQuery());
-        }
-
-        $sort = $request->has('sort') ? $request->get('sort')['id'] : null;
-        $currentSort = $this->shopService->getCurrentProductSortingFromSortId($sort);
         Inertia::share('shop', [
-            'sortOptions' => $this->shopService->getProductSortingArray($currentSort['id']),
+            'sortOptions' => $this->shopService->getProductSorting(),
+            'filterOptions' => $this->shopService->getShopFilters()
         ]);
-//        dd(Inertia::getShared('query'));
 
 
-        $products = Product::all();
-
-        return $this->inertia->render('Shop', [
-            'products' => $products->toArray(),
-        ]);
+        return $this->inertia->render('Shop');
     }
 
     /**

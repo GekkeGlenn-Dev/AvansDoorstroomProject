@@ -22,6 +22,17 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'street',
+        'house_number',
+        'house_number_addition',
+        'postal_code',
+        'city',
+        'country'
+    ];
+
     public function orderStatus(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class);

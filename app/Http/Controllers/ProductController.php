@@ -77,23 +77,4 @@ class ProductController extends Controller
         $product->delete();
         return \response()->redirectToRoute('dashboard.product.index')->with('success', 'Product verwijderd!');
     }
-
-    // TODO change
-    public function ApiQuery(Request $request): string
-    {
-        if (!$request->has('query')) {
-            $query = $this->shopService->getQuery();
-        } else {
-            $query = $request->get('query');
-        }
-        if (!is_array($query)) {
-            return 'is not array';
-        }
-
-        if (!key_exists('sorts', $query) || !key_exists('filters', $query)) {
-            return '';
-        }
-
-        return $this->shopService->executeProductQuery($query, true);
-    }
 }

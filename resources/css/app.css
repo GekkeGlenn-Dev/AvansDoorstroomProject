@@ -18,6 +18,10 @@
     @apply rounded bg-transparent text-dark-100 w-2/3;
 }
 
+.form-input-checkout {
+    @apply rounded bg-transparent w-full;
+}
+
 .form-submit-button {
     @apply px-2 py-1 green-hover-state bg-transparent block text-dark-100 rounded transition-colors duration-150 ease-in-out border border-dark-800 hover:text-dark-green hover:border-dark-green;
 }
