@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Str;
 
 class ProductCategorySeeder extends Seeder
 {
@@ -26,6 +27,7 @@ class ProductCategorySeeder extends Seeder
     {
         $this->categories[] = [
             'name' => $name,
+            'slug' => Str::slug($name),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];

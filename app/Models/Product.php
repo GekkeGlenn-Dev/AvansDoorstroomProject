@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @property mixed id
@@ -27,13 +28,8 @@ class Product extends Model
             ->withPivot('quantity');
     }
 
-    public function images(): HasMany
+    public function descriptionToHtml(): void
     {
-        return $this->hasMany(ProductImage::class);
-    }
-
-    public function vat(): BelongsTo
-    {
-        return $this->belongsTo(Vat::class);
+        $this->description_as_html = $this->description ? Str::markdown($this->description) : $this->description;
     }
 }

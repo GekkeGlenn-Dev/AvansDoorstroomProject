@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Str;
 
 class ProductCategoryFactory extends Factory
 {
@@ -21,8 +22,11 @@ class ProductCategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->colorName;
+
         return [
-            'name' => $this->faker->colorName
+            'name' => $name,
+            'slug' => Str::slug($name),
         ];
     }
 }

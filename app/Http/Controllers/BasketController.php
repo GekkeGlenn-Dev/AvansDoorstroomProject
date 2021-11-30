@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BasketCheckoutFormRequest;
 use App\Models\Order;
-use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Services\BasketService;
 use App\Services\DashboardService;
 use App\Services\ShopService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Response;
 use Inertia\ResponseFactory as InertiaResponseFactory;
@@ -50,7 +47,6 @@ class BasketController extends Controller
         return Redirect::back()->with('basket_notification', sprintf('Product %s is verwijderd van winkelmand.', $product->title));
     }
 
-    // todo pagina met informatie voor order, Met alle details van winkelmand
     public function checkoutDetails(Request $request): Response
     {
         return $this->inertia->render('Checkout/Checkout', [
@@ -58,38 +54,6 @@ class BasketController extends Controller
         ]);
     }
 
-    // todo save informatie naar database en maak een order aan. Redirect naar checkoutOrderDetails
-    //  Leeg zijn winkelmand.
-    public function processCheckout(BasketCheckoutFormRequest $request): RedirectResponse
-    {
-        $validated = $request->validated();
-
-        $basket = $this->basketService->getBasket($request);
-
-        $order = new Order();
-        if (auth()->check()) {
-            $order->user()->associate($request->user());
-        }
-
-        $order->order_status_id = OrderStatus::ORDER_PAYED;
-        $order->number = Carbon::now()->getTimestamp();
-        $order->fill($validated);
-        $order->save();
-
-        foreach($basket->products as $product) {
-            $order->products()->attach($product->id, ['quantity' => $product->pivot->quantity]);
-            $product->stock -= $product->pivot->quantity;
-            $basket->products()->detach($product->id);
-            $product->save();
-        }
-
-        $order->save();
-        $basket->save();
-
-        return Redirect::route('basket.checkout.finish');
-    }
-
-    // todo the order details die net betaald is.
     public function checkoutOrderDetails(Order $order): Response
     {
         $order->loadMissing('products');

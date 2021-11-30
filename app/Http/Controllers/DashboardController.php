@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\User;
 use Carbon\CarbonPeriod;
@@ -13,19 +14,19 @@ class DashboardController extends Controller
 {
     public function dashboard(Request $request): Response
     {
-        if (!$request->user()->isAdmin()) {
-            $orders = Order::with('products', 'orderStatus')
-                ->where('user_id', '=', $request->user()->id)
-                ->whereBetween('created_at', [now()->subDays(10), now()])
-                ->paginate(10);
-            return $this->inertia->render('Dashboard/DashboardCustomer', [
-                'orders' => $orders,
-            ]);
-        }
+        $orders = Order::with('products', 'orderStatus')
+            ->where('user_id', '=', $request->user()->id)
+            ->whereBetween('created_at', [now()->subDays(10), now()])
+            ->paginate(10);
+        return $this->inertia->render('Dashboard/DashboardCustomer', [
+            'orders' => $orders,
+        ]);
+    }
 
-
+    public function admin(): Response
+    {
         $whereDate = now()->subDays(30);
-        $orders = Order::with('products')->where('order_status_id', '=', 2)->whereDate('created_at', '>', $whereDate)->get();
+        $orders = Order::with('products')->where('order_status_id', '=', OrderStatus::ORDER_PAYED)->whereDate('created_at', '>', $whereDate)->get();
         $period = CarbonPeriod::create($whereDate->format('d-m-Y'), now()->format('d-m-Y'))->toArray();
 
         $revenueAndSalesTotals = $this->dashboardService->generateRevenueAndSalesOverviewTotals($orders);

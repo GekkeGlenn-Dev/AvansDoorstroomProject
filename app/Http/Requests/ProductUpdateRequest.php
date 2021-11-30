@@ -36,6 +36,12 @@ class ProductUpdateRequest extends FormRequest
                 'nullable',
                 'numeric'
             ],
+            'image' => [
+                'nullable',
+                'file',
+                'mimes:png,jpg,jpeg',
+                'max:2048'
+            ]
         ];
     }
 }

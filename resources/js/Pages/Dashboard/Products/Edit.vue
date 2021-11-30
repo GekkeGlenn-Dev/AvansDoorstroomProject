@@ -2,7 +2,7 @@
     <dashboard-layout :title="product.title">
         <template #extra>
             <div class="flex space-x-2">
-                <button class="form-submit-button" @click.prevent="submit">
+                <button class="form-submit-button" @click.prevent="submit" :disabled="form.processing">
                     Opslaan
                 </button>
                 <button

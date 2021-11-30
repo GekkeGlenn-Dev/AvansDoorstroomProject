@@ -2,15 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BasketCheckoutFormRequest;
 use App\Models\Order;
-use App\Models\Product;
+use App\Models\OrderStatus;
+use App\Services\BasketService;
+use App\Services\DashboardService;
+use App\Services\ShopService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Inertia\Inertia;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Response;
+use Inertia\ResponseFactory as InertiaResponseFactory;
 
 class OrderController extends Controller
 {
-    public function index(): \Inertia\Response
+    private BasketService $basketService;
+
+    public function __construct(
+        InertiaResponseFactory $inertia, ShopService $shopService, DashboardService $dashboardService,
+        BasketService $basketService
+    ) {
+        parent::__construct($inertia, $shopService, $dashboardService);
+        $this->basketService = $basketService;
+    }
+
+    public function index(): Response
     {
         return $this->inertia->render('Dashboard/Orders/Index', [
             'orders' => Order::with('orderStatus', 'user')
@@ -20,22 +37,56 @@ class OrderController extends Controller
         ]);
     }
 
-    public function create()
+    public function store(BasketCheckoutFormRequest $request): RedirectResponse
     {
-        //
+        $validated = $request->validated();
+
+        $basket = $this->basketService->getBasket($request);
+
+        $order = new Order();
+        if (auth()->check()) {
+            $order->user()->associate($request->user());
+        }
+
+        $order->order_status_id = OrderStatus::ORDER_PAYED;
+        $order->number = Carbon::now()->getTimestamp();
+        $order->fill($validated);
+        $order->save();
+
+        foreach ($basket->products as $product) {
+            $order->products()->attach($product->id, ['quantity' => $product->pivot->quantity]);
+            $basket->products()->detach($product->id);
+            $product->save();
+        }
+
+        $order->save();
+        $basket->save();
+
+        return Redirect::route('basket.checkout.finish', ['order' => $order]);
     }
 
-    public function store(Request $request)
+    public function showAll(Request $request): Response
     {
-        //
+        $orders = Order::with('products', 'orderStatus')
+            ->where('user_id', '=', $request->user()->id)
+            ->orderByDesc('id')
+            ->paginate(10);
+
+        return $this->inertia->render('Dashboard/Orders/ShowAll', [
+            'orders' => $orders,
+        ]);
     }
 
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
+        $order->loadMissing('products', 'orderStatus');
 
+        return $this->inertia->render('Dashboard/Orders/Show', [
+            'order' => $order,
+        ]);
     }
 
-    public function edit(Order $order): \Inertia\Response
+    public function edit(Order $order): Response
     {
         $order->loadMissing('orderStatus', 'user', 'products');
 
@@ -48,28 +99,5 @@ class OrderController extends Controller
         return $this->inertia->render('Dashboard/Orders/Edit', [
             'order' => $order,
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Order $order
-     * @return Response
-     */
-    public function update(Request $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Order $order
-     * @return Response
-     */
-    public function destroy(Order $order)
-    {
-        //
     }
 }

@@ -14,25 +14,14 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    public function shop(Request $request): Response
+    public function shop(): Response
     {
-        Inertia::share('shop', [
+        $this->inertia->share('shop', [
             'sortOptions' => $this->shopService->getProductSorting(),
             'filterOptions' => $this->shopService->getShopFilters()
         ]);
 
 
         return $this->inertia->render('Shop');
-    }
-
-    /**
-     * TODO Add filters to session, misschien dit ook doen voor sort?
-     *
-     * @param Request $request
-     */
-    public function addShopFiltersToSession(Request $request)
-    {
-//        $request->session()->put('filters', ['filter', 'filter2']);
-        dd($request->session()->all());
     }
 }

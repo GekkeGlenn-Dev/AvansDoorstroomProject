@@ -1,8 +1,13 @@
 <template>
     <div class="bg-dark-600 flex h-screen">
         <nav class="h-full w-60 hidden md:block flex-shrink-0 py-6 px-2 space-y-2 bg-dark-800">
-            <nav-item :url="route('dashboard.home')"
-                      :active="route().current('dashboard.home')"
+          <nav-item :url="route('dashboard.home')"
+                    :active="route().current('dashboard.home')"
+          >
+            Mijn dashboard
+          </nav-item>
+            <nav-item :url="route('dashboard.admin')"
+                      :active="route().current('dashboard.admin')"
             >
                 Dashboard
             </nav-item>

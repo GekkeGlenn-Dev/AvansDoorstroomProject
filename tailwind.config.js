@@ -27,7 +27,10 @@ module.exports = {
                     900: '#111111',
                     green: '#10CB8A'
                 }
-            }
+            },
+            gridTemplateRows: {
+                '[auto,auto,1fr]': 'auto auto 1fr',
+            },
         },
     },
     variants: {
@@ -39,6 +42,6 @@ module.exports = {
 
     plugins: [
         require('@tailwindcss/forms'),
-        require('@tailwindcss/typography')
+        require('@tailwindcss/typography'),
     ],
 };

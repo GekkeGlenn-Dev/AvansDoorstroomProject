@@ -2,84 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductCategoryStoreRequest;
+use App\Http\Requests\ProductCategoryUpdateRequest;
 use App\Models\ProductCategory;
+use App\Services\DashboardService;
+use App\Services\ProductCategoryService;
+use App\Services\ShopService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Response;
+use Inertia\ResponseFactory as InertiaResponseFactory;
+use Str;
 
 class ProductCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    private ProductCategoryService $productCategoryService;
+
+    public function __construct(InertiaResponseFactory $inertia, ShopService $shopService, DashboardService $dashboardService, ProductCategoryService $productCategoryService)
     {
-        //
+        parent::__construct($inertia, $shopService, $dashboardService);
+        $this->productCategoryService = $productCategoryService;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function index(Request $request): Response
     {
-        //
+        $categories = $this->productCategoryService->allPaginate();
+
+        return $this->inertia->render('Dashboard/Products/categories/Index', [
+            'categories' => $categories,
+            'could_not_delete' => $request->get('could_not_delete'),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(ProductCategoryStoreRequest $request): RedirectResponse
     {
-        //
+        $this->productCategoryService->create($request->validated());
+        return redirect()->route('dashboard.product.category.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ProductCategory  $productCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ProductCategory $productCategory)
+    public function update(ProductCategoryUpdateRequest $request, ProductCategory $productCategory): RedirectResponse
     {
-        //
+        $this->productCategoryService->save($productCategory, $request->validated());
+        return redirect()->route('dashboard.product.category.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ProductCategory  $productCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ProductCategory $productCategory)
+    public function destroy(ProductCategory $productCategory): RedirectResponse
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ProductCategory  $productCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, ProductCategory $productCategory)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ProductCategory  $productCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ProductCategory $productCategory)
-    {
-        //
+        try {
+            $this->productCategoryService->delete($productCategory);
+            return redirect()->route('dashboard.product.category.index');
+        } catch (Exception $e) {
+            return redirect()->back()->with('could_not_delete', 'Categorie heeft producten gekoppeld.');
+        }
     }
 }

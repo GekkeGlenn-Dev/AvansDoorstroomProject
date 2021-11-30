@@ -50,6 +50,7 @@ export default {
         PlusSmIcon,
         XIcon,
     },
+    emits: ["onUpdate"],
     methods: {
         onUpdate() {
             this.$emit('onUpdate')

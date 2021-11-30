@@ -5,9 +5,10 @@
                 <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">Producten</h2>
 
                 <div v-if="products" class="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-
                     <product-card v-for="product in products.data" :product="product" />
-
+                </div>
+                <div v-if="products && products.links">
+                    <shop-pagination :links="products.links" @paginationClicked="setPage"/>
                 </div>
             </div>
         </div>
@@ -17,10 +18,12 @@
 <script>
 import ShopLayout from "../Layouts/ShopLayout";
 import ProductCard from "../Components/ProductCard";
+import Pagination from "../Components/Pagination";
+import ShopPagination from "../Components/ShopPagination";
 
 export default {
     name: "Shop",
-    components: {ProductCard, ShopLayout},
+    components: {ShopPagination, Pagination, ProductCard, ShopLayout},
 
     created() {
         this.sortingOptions = this.$page.props.shop.sortOptions;
@@ -33,14 +36,20 @@ export default {
             products: null,
             sortingOptions: [],
             filters: null,
+            page: 1
         }
     },
     methods: {
         fetchProducts() {
-            axios.get(route('api.v1.product.index', {sortOptions: this.sortingOptions, filters: this.$page.props.shop.filterOptions }))
+            axios.get(route('api.v1.product.index', {sortOptions: this.sortingOptions, filters: this.$page.props.shop.filterOptions, page: this.page }))
             .then(response => {
                 this.products = response.data;
+                this.page = response.data.current_page;
             });
+        },
+        setPage(page) {
+            this.page = page;
+            this.fetchProducts();
         },
         filterUpdate(options) {
             this.sortingOptions = options;

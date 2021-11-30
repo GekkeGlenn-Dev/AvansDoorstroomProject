@@ -12,9 +12,8 @@
                         <div class="flow-root">
                             <ul role="list" class="-my-6 divide-y divide-gray-200" v-if="basket">
                                 <li v-for="product in basket.products" :key="product.id" class="py-6 flex">
-                                    <div
-                                        class="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
-                                        <!--                                                        <img :src="product.imageSrc" :alt="product.imageAlt" class="w-full h-full object-center object-cover" />-->
+                                    <div class="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
+                                        <img :src="'http://avansdoorstroomproject.loc/storage/' + product.image_path" class="w-full h-full object-center object-cover" />
                                     </div>
 
                                     <div class="ml-4 flex-1 flex flex-col">
@@ -22,9 +21,9 @@
                                             <div
                                                 class="flex justify-between text-base font-medium text-gray-900">
                                                 <h3>
-                                                    <a :href="'#'">
+                                                    <inertia-link :href="route('shop.product.show', {product: product})">
                                                         {{ product.title }}
-                                                    </a>
+                                                    </inertia-link>
                                                 </h3>
                                                 <p class="ml-4">
                                                     {{getCurrencyFormat(product.price) }}
@@ -38,9 +37,9 @@
                                             <p class="text-gray-500">Aantal {{ product.pivot.quantity }}</p>
 
                                             <div class="flex">
-                                                <inertia-link :href="route('shop.product.remove', {product: product})" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                                <button @click.prevent="deleteItem(product)" class="font-medium text-indigo-600 hover:text-indigo-500">
                                                     Verwijder
-                                                </inertia-link>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -137,6 +136,9 @@ export default {
             }
 
             return (total / 121) * 21;
+        },
+        deleteItem(product) {
+            this.$inertia.post(route('shop.product.remove', {product: product}));
         }
     },
     computed: {

@@ -17,7 +17,7 @@
                     </table-data>
                     <table-data :edit="true">
                         <inertia-link :href="route('dashboard.order.edit', {order: order})" class="green-hover-state">
-                            Bewerken
+                            Bekijk
                         </inertia-link>
                     </table-data>
                 </table-column>

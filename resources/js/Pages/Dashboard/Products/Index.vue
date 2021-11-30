@@ -1,10 +1,17 @@
 <template>
     <dashboard-layout title="Producten">
         <template #extra>
-            <inertia-link class="form-submit-button" :href="route('dashboard.product.create')">
-                Product toevoegen
-            </inertia-link>
+            <div class="flex justify-between space-x-4 items-center">
+                <inertia-link class="form-submit-button" :href="route('dashboard.product.category.index')">
+                    Categorieën
+                </inertia-link>
+
+                <inertia-link class="form-submit-button" :href="route('dashboard.product.create')">
+                    Product toevoegen
+                </inertia-link>
+            </div>
         </template>
+
         <card class="col-span-12">
             <Table :columns="columns">
                 <table-column v-for="product in products.data">
@@ -21,13 +28,14 @@
                         {{product.orders_count}}
                     </table-data>
                     <table-data :edit="true" class="space-x-2">
-                        <inertia-link class="font-medium text-dark-100 hover:text-dark-green" :href="route('dashboard.product.edit', {product: product})">
+                        <inertia-link class="font-medium text-dark-100 hover:text-dark-green"
+                                      :href="route('dashboard.product.edit', {product: product})">
                             Bewerken
                         </inertia-link>
 
-                        <inertia-link class="font-medium text-red-500 hover:text-red-400" :href="route('dashboard.product.destroy', {product: product})">
+                        <button @click.prevent="deleteItem(product)" class="font-medium text-red-500 hover:text-red-400">
                             verwijder
-                        </inertia-link>
+                        </button>
                     </table-data>
                 </table-column>
             </Table>
@@ -59,6 +67,11 @@ export default {
                 'Voorraad',
                 'bestellingen'
             ]
+        }
+    },
+    methods: {
+        deleteItem(product) {
+            this.$inertia.delete(this.route('dashboard.product.destroy', {product: product}))
         }
     }
 }

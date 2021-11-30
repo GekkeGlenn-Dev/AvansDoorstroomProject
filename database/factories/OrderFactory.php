@@ -24,10 +24,12 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::all()->random(1)->first();
+
         return [
-            'user_id' => User::all()->random(1)->first()->id,
+            'user_id' => $user->id,
             'order_status_id' => OrderStatus::all()->random(1)->first()->id,
-            'number' => $this->faker->unique()->numerify('####################'),
+            'number' => $this->faker->unique()->numerify('#########'),
             'street' => $this->faker->streetName,
             'house_number' => $this->faker->numberBetween(1,145),
             'house_number_addition' => $this->faker->randomLetter,
@@ -35,6 +37,8 @@ class OrderFactory extends Factory
             'city' => $this->faker->city,
             'country' => $this->faker->country,
             'created_at' => $this->faker->dateTimeBetween('-60 days'),
+            'name' => $user->name,
+            'email' => $user->email,
         ];
     }
 }
